@@ -1,7 +1,7 @@
 {
   "name": "baileys_zero",
   "type": "module",
-  "version": "1.1.8",
+  "version": "1.2.1",
   "description": "A WebSockets library for interacting with WhatsApp Web",
   "keywords": [
     "whatsapp",
@@ -14,7 +14,8 @@
   "files": [
     "lib/**/*",
     "WAProto/**/*",
-    "engine-requirements.js"
+    "engine-requirements.js",
+    "go-engine/**/*"
   ],
   "dependencies": {
     "@cacheable/node-cache": "^1.4.0",
@@ -109,6 +110,10 @@
     }
   },
   "packageManager": "yarn@4.9.2",
+  "scripts": {
+    "build:engine:linux": "cd go-engine && GOOS=linux GOARCH=amd64 go build -o main_linux main.go",
+    "build:engine:win": "cd go-engine && GOOS=windows GOARCH=amd64 go build -o main_win.exe main.go"
+  },
   "engines": {
     "node": ">=20.0.0"
   }
