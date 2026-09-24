@@ -1,7 +1,7 @@
 {
   "name": "baileys_zero-x",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A WebSockets library for interacting with WhatsApp Web",
   "keywords": [
     "whatsapp",
@@ -21,7 +21,6 @@
     "@cacheable/node-cache": "^1.4.0",
     "@hapi/boom": "^9.1.3",
     "async-mutex": "^0.5.0",
-    "libsignal": "github:dlcine450/libsignal-node",
     "lru-cache": "^11.1.0",
     "music-metadata": "^11.12.3",
     "p-queue": "^9.0.0",

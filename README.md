@@ -89,12 +89,11 @@ A lightweight and modern WhatsApp Web library built on WebSockets for Node.js.
 - @cacheable/node-cache
 - @hapi/boom
 - async-mutex
-- libsignal
 - lru-cache
 - music-metadata
 - pino
 - protobufjs
-- whatsapp-rust-bridge
+- whatsapp-rust-bridge (WASM: Signal protocol + fast utils)
 - ws
 
 ## Authentication
@@ -295,6 +294,27 @@ Notes:
   If the binary is absent, baileys tries `go run main.go` (needs Go installed).
   Rebuild the binaries after updating `go-engine/main.go`:
   `npm run build:engine:linux` (and `build:engine:win` for Windows).
+
+## Signal Engine (Rust/WASM)
+
+The Signal protocol stack (session cipher, group sender keys, X25519 curve ops) runs
+on `whatsapp-rust-bridge` (Rust compiled to WASM) instead of the unmaintained
+`libsignal` JS package. This removes a fragile GitHub dependency and centralises the
+crypto in native Rust code.
+
+Notes:
+
+- Session/identity/pre-key records follow the standard Signal record layout, but
+  sender-key records from older versions were stored as JSON — those are detected and
+  auto-rekeyed via a fresh `SenderKeyDistributionMessage` on the next group send.
+- You can supply your own repository via `config.makeSignalRepository` (default is
+  `makeLibSignalRepository` from `lib/Signal/libsignal.js`).
+
+## Stability
+
+- `config.dedupeResends` (default `true`) drops duplicate message resends from the
+  server within a 5-minute window (keyed by remote JID / fromMe / id / participant),
+  so retried messages are acked but only surfaced once via `messages.upsert`.
 
 ## Authors
 
