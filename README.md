@@ -89,11 +89,12 @@ A lightweight and modern WhatsApp Web library built on WebSockets for Node.js.
 - @cacheable/node-cache
 - @hapi/boom
 - async-mutex
+- libsignal
 - lru-cache
 - music-metadata
 - pino
 - protobufjs
-- whatsapp-rust-bridge (WASM: Signal protocol + fast utils)
+- whatsapp-rust-bridge
 - ws
 
 ## Authentication
@@ -261,60 +262,6 @@ sock.ev.on('creds.update', saveCreds)
 > [!IMPORTANT]
 > In `messages.upsert` it's recommended to use a loop like `for (const message of event.messages)` to handle all messages in array
 
-## Go Media Engine (Optional)
-
-Media uploads (encryption + upload) and downloads (decrypt) can be offloaded to the
-bundled **Go** engine (whatsmeow-based, self-contained under `go-engine/`), which
-talks to WhatsApp over a lightweight JSON-line stdio protocol, freeing the Node
-process from AES/encryption work:
-
-```js
-import makeWASocket, { getMediaEngine } from 'baileys_zero'
-
-const sock = makeWASocket({
-    auth: state,
-    useGoMediaEngine: true,        // enable the Go engine for media
-    mediaEngineSession: 'media'    // separate SQLite session for the engine
-})
-
-// one-time: pair the engine's own session (it runs as an extra linked device)
-const mediaEngine = getMediaEngine('media')
-mediaEngine.on('pairing_code', (code) => console.log('Engine pairing code:', code))
-mediaEngine.requestPairingCode('628xxxxxxxxxx')
-```
-
-Notes:
-
-- The engine keeps its own session (`./sessions/<mediaEngineSession>/whatsmeow.db`)
-  and must be logged in once via the pairing code above.
-- If the engine is not connected, is missing, or a media command fails, baileys
-  silently falls back to the built-in JS media path, so `useGoMediaEngine` is safe
-  to keep on.
-- The engine runs as a bundled binary (`go-engine/main_linux` / `main_win.exe`).
-  If the binary is absent, baileys tries `go run main.go` (needs Go installed).
-  Rebuild the binaries after updating `go-engine/main.go`:
-  `npm run build:engine:linux` (and `build:engine:win` for Windows).
-
-## Signal Engine (Rust/WASM)
-
-The Signal protocol stack (session cipher, group sender keys, X25519 curve ops) runs
-on `whatsapp-rust-bridge` (Rust compiled to WASM) instead of the unmaintained
-`libsignal` JS package. This removes a fragile GitHub dependency and centralises the
-crypto in native Rust code.
-
-Notes:
-
-- Session/identity/pre-key records follow the standard Signal record layout, but
-  sender-key records from older versions were stored as JSON — those are detected and
-  auto-rekeyed via a fresh `SenderKeyDistributionMessage` on the next group send.
-- You can supply your own repository via `config.makeSignalRepository` (default is
-  `makeLibSignalRepository` from `lib/Signal/libsignal.js`).
-
-## Stability
-
-- `config.dedupeResends` (default `true`) drops duplicate message resends from the
-  server within a 5-minute window (keyed by remote JID / fromMe / id / participant),
-  so retried messages are acked but only surfaced once via `messages.upsert`.
 
 ## Authors
 
